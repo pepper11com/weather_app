@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">weather</string>
+
+    <string name="weather_screen">Weather Screen</string>
+    <string name="detail_screen">Detail Screen</string>
+
+    <string name="search_hint">Search…</string>
+
+    <string name="error">Error</string>
+    <string name="no_results">No Result</string>
+    <string name="empty">Empty</string>
+
+
+</resources>
