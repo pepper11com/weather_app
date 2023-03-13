@@ -1,23 +1,22 @@
 package com.example.weather.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.weather.viewmodel.WeatherViewModel
@@ -27,7 +26,8 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.weather.api.Api.Companion.BASE_IMAGE_URL
 import com.example.weather.api.util.Resource
-import java.util.*
+import com.example.weather.datamodel.QueryResult
+import com.example.weather.datamodel.Weather
 
 
 @Composable
@@ -37,7 +37,7 @@ fun WeatherDetailScreen(
 ) {
     val selectedWeather = viewModel.selectedWeather
     val weatherForecast by viewModel.weatherForecast.observeAsState(initial = Resource.Empty())
-    val selectedTime = remember { mutableStateOf("") }
+    val selectedTimesByDate = remember { mutableStateMapOf<String, String>() }
 
     selectedWeather?.let { weather ->
         Column(
@@ -47,131 +47,221 @@ fun WeatherDetailScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.Top
         ) {
-            Text(
-                text = weather.name,
-                style = MaterialTheme.typography.h4,
-                modifier = Modifier.padding(bottom = 8.dp)
+
+            WeatherDetailsHeader(weather)
+
+            WeatherDetailsItem("Description: ", weather.weather.first().description.replaceFirstChar { it.uppercase() })
+            WeatherDetailsItem("Feels like: ", "${weather.main.feelsLike.toInt()}°C")
+            WeatherDetailsItem("Humidity: ", "${weather.main.humidity}%")
+            WeatherDetailsItem("Wind: ", "${weather.wind.speed} m/s")
+
+            ForecastSection(
+                weatherForecast,
+                selectedTimesByDate
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-                WeatherIcon(icon = weather.weather.first().icon)
+        }
+    }
+}
+
+@Composable
+fun ForecastSuccess(
+    weatherForecast: Resource<QueryResult>,
+    selectedTimesByDate: MutableMap<String, String>
+){
+    val forecast = weatherForecast.data
+
+    forecast?.let {
+        Text(
+            text = "Forecast",
+            style = MaterialTheme.typography.h4,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+
+
+
+        val forecastByDate = forecast.list.groupBy { it.dt_txt?.substring(0, 10) }
+        val first5Dates = forecastByDate.keys.take(5)
+
+        first5Dates.withIndex().forEach { (index, date) ->
+            val times = forecastByDate[date]
+            if (times != null) {
                 Text(
-                    text = "${weather.main.temp.toInt()}°C",
-                    style = MaterialTheme.typography.h2,
-                    modifier = Modifier.padding(start = 16.dp)
+                    text = date ?: "",
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(bottom = 8.dp, top = 16.dp)
                 )
-            }
 
-            Text(
-                text = weather.weather.first().description.replaceFirstChar { it.uppercase() },
-                style = MaterialTheme.typography.subtitle1,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+                val timesForDate = times.map { it.dt_txt?.substring(11, 16) ?: "" }.distinct()
 
-            Text(
-                text = "Feels like ${weather.main.feelsLike.toInt()}°C",
-                style = MaterialTheme.typography.subtitle1,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+                TimeRow(
+                    date,
+                    timesForDate,
+                    selectedTimesByDate
+                )
 
-            Text(
-                text = "Humidity ${weather.main.humidity}%",
-                style = MaterialTheme.typography.subtitle1,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+                WeatherDetails(
+                    date,
+                    times,
+                    selectedTimesByDate
+                )
 
-            Text(
-                text = "Wind ${weather.wind.speed} m/s",
-                style = MaterialTheme.typography.subtitle1,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            when (weatherForecast) {
-                is Resource.Loading -> {
-                    Text(
-                        text = "Loading forecast...",
-                        style = MaterialTheme.typography.subtitle1,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-                is Resource.Success -> {
-                    val forecast = weatherForecast.data
-                    forecast?.let {
-                        Text(
-                            text = "Forecast for the next 5 days:",
-                            style = MaterialTheme.typography.subtitle1,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        // Get a list of all available times for the selected day
-                        val times = forecast.list.filter {
-                            it.dt_txt.startsWith(
-                                selectedWeather.dt_txt?.substring(0, 10) ?: ""
-                            )
-                        }
-                            .map { it.dt_txt?.substring(11, 16) ?: "" }
-                            .distinct()
-
-                        // Display the weather forecast for the selected time
-                        val filteredForecast = forecast.list.filter {
-                            it.dt_txt.startsWith(
-                                selectedWeather.dt_txt?.substring(0, 10) ?: ""
-                            ) && it.dt_txt?.substring(11, 16) == selectedTime.value
-                        }
-
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            times.forEach { time ->
-                                Button(
-                                    onClick = {
-                                        selectedTime.value = time
-                                    },
-                                    modifier = Modifier.padding(8.dp),
-                                    colors = ButtonDefaults.buttonColors(backgroundColor = if (selectedTime.value == time) Color.Gray else Color.White)
-                                ) {
-                                    Text(text = time)
-                                }
-                            }
-                        }
-                        // Display the weather forecast for the selected time
-                        filteredForecast.forEach { forecast ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            ) {
-                                WeatherIcon(icon = forecast.weather.first().icon)
-                                Text(
-                                    text = "${forecast.main.temp.toInt()}°C",
-                                    style = MaterialTheme.typography.h2,
-                                    modifier = Modifier.padding(start = 16.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-                is Resource.Error -> {
-                    Text(
-                        text = "Error loading forecast",
-                        style = MaterialTheme.typography.subtitle1,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-                else -> {
-                    Text(
-                        text = "No forecast available",
-                        style = MaterialTheme.typography.subtitle1,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                if (index != first5Dates.size - 1) {
+                    Spacer(
+                        modifier = Modifier
+                            .padding(top = 24.dp, bottom = 24.dp)
+                            .height(2.dp)
+                            .fillMaxWidth()
+                            .background(Color.LightGray)
                     )
                 }
             }
         }
     }
 }
+
+@Composable
+fun TimeRow(
+    date: String?,
+    timesForDate: List<String>,
+    selectedTimesByDate: MutableMap<String, String>
+){
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        items(timesForDate) { time ->
+            Button(
+                onClick = {
+                    selectedTimesByDate[date ?: ""] = time
+                },
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = if (selectedTimesByDate[date ?: ""] == time) {
+                        Color.LightGray
+                    } else {
+                        Color.Transparent
+                    }
+                ),
+                modifier = Modifier.padding(horizontal = 4.dp)
+            ) {
+                Text(text = time)
+            }
+        }
+    }
+}
+
+@Composable
+fun ForecastSection(
+    weatherForecast: Resource<QueryResult>,
+    selectedTimesByDate: MutableMap<String, String>
+) {
+    when (weatherForecast) {
+        is Resource.Loading -> {
+            WeatherDetailsItem(
+                title = "Loading forecast...",
+                value = ""
+            )
+        }
+        is Resource.Success -> {
+            ForecastSuccess(
+                weatherForecast,
+                selectedTimesByDate
+            )
+        }
+        is Resource.Error -> {
+            WeatherDetailsItem(
+                title = "Error loading forecast: ",
+                value = weatherForecast.message ?: ""
+            )
+        }
+        else -> {
+            WeatherDetailsItem(
+                title = "No forecast available",
+                value = ""
+            )
+        }
+    }
+}
+
+@Composable
+fun WeatherDetails(
+    date: String?,
+    times: List<Weather>,
+    selectedTimesByDate: MutableMap<String, String>
+){
+    val selectedTime = selectedTimesByDate[date ?: ""]
+    selectedTime?.let { time ->
+
+        val selectedWeather = times.firstOrNull { it.dt_txt?.substring(11, 16) == time }
+        selectedWeather?.let { weather ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                WeatherIcon(icon = weather.weather.first().icon)
+
+                WeatherDetailsItem(
+                    title = "Temperature: ",
+                    value = weather.main.temp.toInt().toString() + "°C",
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+
+            WeatherDetailsItem(
+                title = "Description: ",
+                value =  weather.weather.first().description.replaceFirstChar { it.uppercase() }
+            )
+            WeatherDetailsItem(
+                title = "Feels like: ",
+                value = "${weather.main.feelsLike.toInt()}°C"
+            )
+            WeatherDetailsItem(
+                title = "Humidity: ",
+                value = "${weather.main.humidity}%"
+            )
+            WeatherDetailsItem(
+                title = "Wind: ",
+                value = "${weather.wind.speed} m/s"
+            )
+        }
+    }
+}
+
+
+//have an optional modifier to allow for customisation, on default it is Modifier.padding(bottom = 8.dp)
+@Composable
+fun WeatherDetailsItem(title: String, value: String, modifier: Modifier = Modifier.padding(bottom = 8.dp)) {
+    Text(
+        text = "$title $value",
+        style = MaterialTheme.typography.subtitle1,
+        modifier = modifier
+    )
+}
+
+
+@Composable
+fun WeatherDetailsHeader(weather: Weather) {
+    Text(
+        text = weather.name,
+        style = MaterialTheme.typography.h4,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(bottom = 8.dp)
+    ) {
+        WeatherIcon(icon = weather.weather.first().icon)
+        Text(
+            text = "${weather.main.temp.toInt()}°C",
+            style = MaterialTheme.typography.h2,
+            modifier = Modifier.padding(start = 16.dp)
+        )
+    }
+}
+
+
+
 
 @Composable
 fun WeatherIcon(icon: String) {

@@ -50,14 +50,14 @@ fun SearchWeatherView(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                {
+
+
                     SearchView(
                         viewModel = viewModel,
                         apiKey = apiKey
                     )
-                }
-            )
+
+            
         },
     ){
         WeatherList(
