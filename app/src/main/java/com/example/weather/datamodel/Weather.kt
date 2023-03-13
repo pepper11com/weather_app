@@ -14,8 +14,11 @@ data class Weather(
     val rain: Rain,
     val snow: Snow,
     val clouds: Clouds,
-    val weather: List<WeatherDescription>
+    val weather: List<WeatherDescription>,
+    val dt_txt: String
 ) {
+
+
     data class Coord(
         val lat: Double,
         val lon: Double

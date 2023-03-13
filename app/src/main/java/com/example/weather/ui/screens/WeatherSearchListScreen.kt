@@ -63,7 +63,8 @@ fun SearchWeatherView(
         WeatherList(
             searchResults = searchResults,
             navController = navController,
-            viewModel = viewModel
+            viewModel = viewModel,
+            apiKey = apiKey
         )
     }
 }
@@ -72,7 +73,8 @@ fun SearchWeatherView(
 fun WeatherList(
     searchResults: Resource<QueryResult>,
     navController: NavController,
-    viewModel: WeatherViewModel
+    viewModel: WeatherViewModel,
+    apiKey: String
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -91,7 +93,8 @@ fun WeatherList(
                             WeatherListItem(
                                 weather = weather,
                                 navController = navController,
-                                viewModel = viewModel
+                                viewModel = viewModel,
+                                apiKey = apiKey
                             )
                         }
                     }
@@ -130,7 +133,8 @@ fun WeatherList(
 fun WeatherListItem(
     weather: Weather,
     navController: NavController,
-    viewModel: WeatherViewModel
+    viewModel: WeatherViewModel,
+    apiKey: String
 ) {
     Card(
         modifier = Modifier
@@ -139,11 +143,12 @@ fun WeatherListItem(
         elevation = 8.dp,
         onClick = {
             viewModel.setSelectedWeather(weather)
+            viewModel.getWeatherForecast(weather.name, apiKey)
             navController.navigate(WeatherScreens.DetailScreen.route)
         }
     ) {
         Text(
-            text = weather.name,
+            text = "${weather.name}, ${weather.sys.country}",
             modifier = Modifier.padding(16.dp),
             textAlign = TextAlign.Center
         )
@@ -168,7 +173,6 @@ fun SearchView(
             searchQueryState.value = value
 
             viewModel.searchWeather(value.text, apiKey)
-
         },
         modifier = Modifier.fillMaxWidth(),
         textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
