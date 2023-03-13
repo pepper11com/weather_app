@@ -6,11 +6,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -42,7 +46,7 @@ import com.example.weather.datamodel.Weather
 fun SearchWeatherView(
     viewModel: WeatherViewModel = viewModel(),
     navController: NavController
-){
+) {
 
     val searchResults by viewModel.searchResult.observeAsState(initial = Resource.Empty())
     val context = LocalContext.current
@@ -50,16 +54,12 @@ fun SearchWeatherView(
 
     Scaffold(
         topBar = {
-
-
-                    SearchView(
-                        viewModel = viewModel,
-                        apiKey = apiKey
-                    )
-
-            
+            SearchView(
+                viewModel = viewModel,
+                apiKey = apiKey
+            )
         },
-    ){
+    ) {
         WeatherList(
             searchResults = searchResults,
             navController = navController,
@@ -167,66 +167,76 @@ fun SearchView(
     }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    TextField(
-        value = searchQueryState.value,
-        onValueChange = { value ->
-            searchQueryState.value = value
+    val customTextSelectionColors = TextSelectionColors(
+        handleColor = Color.LightGray,
+        backgroundColor = Color.LightGray.copy(alpha = 0.3f)
+    )
+    CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+        TextField(
+            value = searchQueryState.value,
+            onValueChange = { value ->
+                searchQueryState.value = value
 
-            viewModel.searchWeather(value.text, apiKey)
-        },
-        modifier = Modifier.fillMaxWidth(),
-        textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
-        leadingIcon = {
-            IconButton(onClick = {
-                //TODO: Your logic here
-                viewModel.searchWeather(searchQueryState.value.text, apiKey)
+                viewModel.searchWeather(value.text, apiKey)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
+            leadingIcon = {
+                IconButton(onClick = {
+                    //TODO: Your logic here
+                    viewModel.searchWeather(searchQueryState.value.text, apiKey)
 
-                keyboardController?.hide()
-            }) {
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .size(24.dp)
-                )
-            }
-        },
-        trailingIcon = {
-            if (searchQueryState.value != TextFieldValue("")) {
-                IconButton(
-                    onClick = {
-                        searchQueryState.value =
-                            TextFieldValue("") // Remove text from TextField when you press the 'X' icon
-                    }
-                ) {
+                    keyboardController?.hide()
+                }) {
                     Icon(
-                        Icons.Default.Close,
+                        Icons.Default.Search,
                         contentDescription = "",
                         modifier = Modifier
                             .padding(16.dp)
                             .size(24.dp)
                     )
                 }
-            }
-        },
-        placeholder = {
-            Text(
-                text = stringResource(R.string.search_hint),
-                color = Color.White
+            },
+            trailingIcon = {
+                if (searchQueryState.value != TextFieldValue("")) {
+                    IconButton(
+                        onClick = {
+                            searchQueryState.value =
+                                TextFieldValue("") // Remove text from TextField when you press the 'X' icon
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "",
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .size(24.dp)
+                        )
+                    }
+                }
+            },
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.search_hint),
+                    color = Color.White
+                )
+            },
+            singleLine = true,
+            shape = RectangleShape, // The TextFiled has rounded corners top left and right by default
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = Color.White,
+                cursorColor = Color.White,
+                leadingIconColor = Color.White,
+                trailingIconColor = Color.White,
+                backgroundColor = Color.Black,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                //copy symbol color
+                errorIndicatorColor = Color.Transparent,
             )
-        },
-        singleLine = true,
-        shape = RectangleShape, // The TextFiled has rounded corners top left and right by default
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = Color.White,
-            cursorColor = Color.White,
-            leadingIconColor = Color.White,
-            trailingIconColor = Color.White,
-            backgroundColor = MaterialTheme.colors.primary,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
         )
-    )
+    }
+
+
 }
