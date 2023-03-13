@@ -40,11 +40,11 @@ fun WeatherTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
     val systemUiController = rememberSystemUiController()
     if(darkTheme){
         systemUiController.setSystemBarsColor(
-            color = Color.Black
+            color = Color(0x83000000)
         )
     }else{
         systemUiController.setSystemBarsColor(
-            color = Color.Black
+            color =  Color(0x83000000)
         )
     }
 

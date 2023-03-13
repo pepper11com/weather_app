@@ -67,7 +67,8 @@ fun WeatherDetailScreen(
 @Composable
 fun ForecastSuccess(
     weatherForecast: Resource<QueryResult>,
-    selectedTimesByDate: MutableMap<String, String>
+    selectedTimesByDate: MutableMap<String, String>,
+    modifier: Modifier,
 ){
     val forecast = weatherForecast.data
 
@@ -114,6 +115,8 @@ fun ForecastSuccess(
                             .fillMaxWidth()
                             .background(Color.LightGray)
                     )
+                } else {
+                    Spacer(modifier = modifier)
                 }
             }
         }
@@ -166,7 +169,8 @@ fun ForecastSection(
         is Resource.Success -> {
             ForecastSuccess(
                 weatherForecast,
-                selectedTimesByDate
+                selectedTimesByDate,
+                modifier = Modifier.navigationBarsPadding()
             )
         }
         is Resource.Error -> {
@@ -228,8 +232,6 @@ fun WeatherDetails(
     }
 }
 
-
-//have an optional modifier to allow for customisation, on default it is Modifier.padding(bottom = 8.dp)
 @Composable
 fun WeatherDetailsItem(title: String, value: String, modifier: Modifier = Modifier.padding(bottom = 8.dp)) {
     Text(
@@ -239,13 +241,14 @@ fun WeatherDetailsItem(title: String, value: String, modifier: Modifier = Modifi
     )
 }
 
-
 @Composable
 fun WeatherDetailsHeader(weather: Weather) {
     Text(
         text = weather.name,
         style = MaterialTheme.typography.h4,
-        modifier = Modifier.padding(bottom = 8.dp)
+        modifier = Modifier
+            .statusBarsPadding()
+            .padding(bottom = 8.dp)
     )
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -259,9 +262,6 @@ fun WeatherDetailsHeader(weather: Weather) {
         )
     }
 }
-
-
-
 
 @Composable
 fun WeatherIcon(icon: String) {

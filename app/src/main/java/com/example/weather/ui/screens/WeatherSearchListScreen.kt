@@ -1,6 +1,7 @@
 package com.example.weather.ui.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -52,14 +53,15 @@ fun SearchWeatherView(
     val context = LocalContext.current
     val apiKey = context.getString(R.string.API_KEY)
 
-    Scaffold(
-        topBar = {
-            SearchView(
-                viewModel = viewModel,
-                apiKey = apiKey
-            )
-        },
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF242424))
     ) {
+        SearchView(
+            viewModel = viewModel,
+            apiKey = apiKey
+        )
         WeatherList(
             searchResults = searchResults,
             navController = navController,
@@ -67,6 +69,7 @@ fun SearchWeatherView(
             apiKey = apiKey
         )
     }
+
 }
 
 @Composable
@@ -77,9 +80,11 @@ fun WeatherList(
     apiKey: String
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+
     ) {
         when (searchResults) {
             is Resource.Success -> {
@@ -179,7 +184,10 @@ fun SearchView(
 
                 viewModel.searchWeather(value.text, apiKey)
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+//                .background(Color(0xFFFF0000))
+                .statusBarsPadding(),
             textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
             leadingIcon = {
                 IconButton(onClick = {
@@ -228,7 +236,7 @@ fun SearchView(
                 cursorColor = Color.White,
                 leadingIconColor = Color.White,
                 trailingIconColor = Color.White,
-                backgroundColor = Color.Black,
+                backgroundColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
@@ -237,6 +245,15 @@ fun SearchView(
             )
         )
     }
+
+    Spacer(
+        //full width spacer only start and end padding is applied of 16dp
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp)
+            .height(2.dp)
+            .background(Color.White),
+    )
 
 
 }
