@@ -1,5 +1,7 @@
 package com.example.weather.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -28,8 +30,11 @@ import com.example.weather.api.Api.Companion.BASE_IMAGE_URL
 import com.example.weather.api.util.Resource
 import com.example.weather.datamodel.QueryResult
 import com.example.weather.datamodel.Weather
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WeatherDetailScreen(
     viewModel: WeatherViewModel = viewModel(),
@@ -43,6 +48,7 @@ fun WeatherDetailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color(0xFF242424))
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.Top
@@ -50,7 +56,9 @@ fun WeatherDetailScreen(
 
             WeatherDetailsHeader(weather)
 
-            WeatherDetailsItem("Description: ", weather.weather.first().description.replaceFirstChar { it.uppercase() })
+            WeatherDetailsItem(
+                "Description: ",
+                weather.weather.first().description.replaceFirstChar { it.uppercase() })
             WeatherDetailsItem("Feels like: ", "${weather.main.feelsLike.toInt()}°C")
             WeatherDetailsItem("Humidity: ", "${weather.main.humidity}%")
             WeatherDetailsItem("Wind: ", "${weather.wind.speed} m/s")
@@ -64,21 +72,22 @@ fun WeatherDetailScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ForecastSuccess(
     weatherForecast: Resource<QueryResult>,
     selectedTimesByDate: MutableMap<String, String>,
     modifier: Modifier,
-){
+) {
     val forecast = weatherForecast.data
 
     forecast?.let {
         Text(
             text = "Forecast",
             style = MaterialTheme.typography.titleLarge,
+            color = Color.White,
             modifier = Modifier.padding(top = 16.dp)
         )
-
 
 
         val forecastByDate = forecast.list.groupBy { it.dt_txt?.substring(0, 10) }
@@ -87,22 +96,27 @@ fun ForecastSuccess(
         first5Dates.withIndex().forEach { (index, date) ->
             val times = forecastByDate[date]
             if (times != null) {
+
+                val localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                val formattedDate = localDate.format(DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy"))
+
                 Text(
-                    text = date ?: "",
+                    text = formattedDate ?: "",
                     style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White,
                     modifier = Modifier.padding(bottom = 8.dp, top = 16.dp)
                 )
 
                 val timesForDate = times.map { it.dt_txt?.substring(11, 16) ?: "" }.distinct()
 
                 TimeRow(
-                    date,
+                    formattedDate ?: "",
                     timesForDate,
                     selectedTimesByDate
                 )
 
                 WeatherDetails(
-                    date,
+                    formattedDate ?: "",
                     times,
                     selectedTimesByDate
                 )
@@ -113,7 +127,7 @@ fun ForecastSuccess(
                             .padding(top = 24.dp, bottom = 24.dp)
                             .height(2.dp)
                             .fillMaxWidth()
-                            .background(Color.LightGray)
+                            .background(MaterialTheme.colorScheme.primary)
                     )
                 } else {
                     Spacer(modifier = modifier)
@@ -128,7 +142,7 @@ fun TimeRow(
     date: String?,
     timesForDate: List<String>,
     selectedTimesByDate: MutableMap<String, String>
-){
+) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(vertical = 8.dp),
@@ -141,15 +155,15 @@ fun TimeRow(
                 },
                 colors = ButtonDefaults.buttonColors(
 
-//                contentColor = if (selectedTimesByDate[date ?: ""] == time) {
-//                    Color.LightGray
-//                } else {
-//                    Color.Gray
-//                },
-                    containerColor = if (selectedTimesByDate[date ?: ""] == time) {
-                        Color.LightGray
+                    contentColor = if (selectedTimesByDate[date ?: ""] == time) {
+                        MaterialTheme.colorScheme.onPrimary
                     } else {
-                        Color.Gray
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    containerColor = if (selectedTimesByDate[date ?: ""] == time) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.surface
                     }
                 ),
                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -160,6 +174,7 @@ fun TimeRow(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ForecastSection(
     weatherForecast: Resource<QueryResult>,
@@ -199,7 +214,7 @@ fun WeatherDetails(
     date: String?,
     times: List<Weather>,
     selectedTimesByDate: MutableMap<String, String>
-){
+) {
     val selectedTime = selectedTimesByDate[date ?: ""]
     selectedTime?.let { time ->
 
@@ -220,7 +235,7 @@ fun WeatherDetails(
 
             WeatherDetailsItem(
                 title = "Description: ",
-                value =  weather.weather.first().description.replaceFirstChar { it.uppercase() }
+                value = weather.weather.first().description.replaceFirstChar { it.uppercase() }
             )
             WeatherDetailsItem(
                 title = "Feels like: ",
@@ -239,10 +254,15 @@ fun WeatherDetails(
 }
 
 @Composable
-fun WeatherDetailsItem(title: String, value: String, modifier: Modifier = Modifier.padding(bottom = 8.dp)) {
+fun WeatherDetailsItem(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier.padding(bottom = 8.dp)
+) {
     Text(
         text = "$title $value",
         style = MaterialTheme.typography.bodyLarge,
+        color = Color.White,
         modifier = modifier
     )
 }
@@ -252,6 +272,7 @@ fun WeatherDetailsHeader(weather: Weather) {
     Text(
         text = weather.name,
         style = MaterialTheme.typography.displaySmall,
+        color = Color.White,
         modifier = Modifier
             .statusBarsPadding()
             .padding(bottom = 8.dp)
@@ -264,6 +285,7 @@ fun WeatherDetailsHeader(weather: Weather) {
         Text(
             text = "${weather.main.temp.toInt()}°C",
             style = MaterialTheme.typography.titleLarge,
+            color = Color.White,
             modifier = Modifier.padding(start = 16.dp)
         )
     }

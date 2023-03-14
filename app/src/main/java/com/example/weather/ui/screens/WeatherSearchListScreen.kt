@@ -7,11 +7,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.AlertDialogDefaults.containerColor
+import androidx.compose.material3.AlertDialogDefaults.textContentColor
+import androidx.compose.material3.AlertDialogDefaults.titleContentColor
+import androidx.compose.material3.ListItemDefaults.contentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -83,7 +87,7 @@ fun WeatherList(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
 
-    ) {
+        ) {
         when (searchResults) {
             is Resource.Success -> {
                 searchResults.data?.let { weather ->
@@ -143,7 +147,11 @@ fun WeatherListItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-//        elevation = 8.dp,
+
+        colors = CardDefaults.cardColors(
+            containerColor  = MaterialTheme.colorScheme.secondary,
+            contentColor = MaterialTheme.colorScheme.onSecondary,
+        ),
         onClick = {
             viewModel.setSelectedWeather(weather)
             viewModel.getWeatherForecast(weather.name, apiKey)
@@ -247,7 +255,6 @@ fun SearchView(
     }
 
     Spacer(
-        //full width spacer only start and end padding is applied of 16dp
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp)

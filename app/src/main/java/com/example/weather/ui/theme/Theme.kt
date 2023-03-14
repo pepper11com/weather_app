@@ -54,8 +54,8 @@ fun WeatherTheme(
 
     SideEffect {
         systemUiController.setSystemBarsColor(
-            color =  Color(0x11000000),
-            darkIcons = darkTheme
+            color =  Color(0x86000000),
+            darkIcons = false
         )
     }
 
