@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.App.Weather.Start" parent="Theme.SplashScreen">
+
+        <item name="windowSplashScreenBackground">#242424</item>
+
+        <item name="windowSplashScreenAnimatedIcon">@drawable/baseline_cloud_queue_24</item>
+
+        <item name="postSplashScreenTheme">@style/Theme.Weather</item>
+
+    </style>
+
+
+</resources>
