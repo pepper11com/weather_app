@@ -38,8 +38,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val isDarkTheme = resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
         setContent {
-            WeatherTheme {
+            WeatherTheme(
+                darkTheme = isDarkTheme
+            ) {
                 WindowCompat.setDecorFitsSystemWindows(window, false)
 
                 window.statusBarColor = Color.Transparent.toArgb()

@@ -7,10 +7,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -75,7 +75,7 @@ fun ForecastSuccess(
     forecast?.let {
         Text(
             text = "Forecast",
-            style = MaterialTheme.typography.h4,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(top = 16.dp)
         )
 
@@ -89,7 +89,7 @@ fun ForecastSuccess(
             if (times != null) {
                 Text(
                     text = date ?: "",
-                    style = MaterialTheme.typography.h6,
+                    style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 8.dp, top = 16.dp)
                 )
 
@@ -140,10 +140,16 @@ fun TimeRow(
                     selectedTimesByDate[date ?: ""] = time
                 },
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (selectedTimesByDate[date ?: ""] == time) {
+
+//                contentColor = if (selectedTimesByDate[date ?: ""] == time) {
+//                    Color.LightGray
+//                } else {
+//                    Color.Gray
+//                },
+                    containerColor = if (selectedTimesByDate[date ?: ""] == time) {
                         Color.LightGray
                     } else {
-                        Color.Transparent
+                        Color.Gray
                     }
                 ),
                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -236,7 +242,7 @@ fun WeatherDetails(
 fun WeatherDetailsItem(title: String, value: String, modifier: Modifier = Modifier.padding(bottom = 8.dp)) {
     Text(
         text = "$title $value",
-        style = MaterialTheme.typography.subtitle1,
+        style = MaterialTheme.typography.bodyLarge,
         modifier = modifier
     )
 }
@@ -245,7 +251,7 @@ fun WeatherDetailsItem(title: String, value: String, modifier: Modifier = Modifi
 fun WeatherDetailsHeader(weather: Weather) {
     Text(
         text = weather.name,
-        style = MaterialTheme.typography.h4,
+        style = MaterialTheme.typography.displaySmall,
         modifier = Modifier
             .statusBarsPadding()
             .padding(bottom = 8.dp)
@@ -257,7 +263,7 @@ fun WeatherDetailsHeader(weather: Weather) {
         WeatherIcon(icon = weather.weather.first().icon)
         Text(
             text = "${weather.main.temp.toInt()}°C",
-            style = MaterialTheme.typography.h2,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(start = 16.dp)
         )
     }

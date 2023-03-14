@@ -4,12 +4,11 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -23,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -108,7 +106,7 @@ fun WeatherList(
             is Resource.Error -> {
                 Text(
                     text = "No results found",
-                    color = MaterialTheme.colors.error,
+                    color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -133,7 +131,7 @@ fun WeatherList(
 }
 
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherListItem(
     weather: Weather,
@@ -145,7 +143,7 @@ fun WeatherListItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        elevation = 8.dp,
+//        elevation = 8.dp,
         onClick = {
             viewModel.setSelectedWeather(weather)
             viewModel.getWeatherForecast(weather.name, apiKey)
@@ -161,7 +159,7 @@ fun WeatherListItem(
 }
 
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SearchView(
     viewModel: WeatherViewModel,
@@ -198,9 +196,9 @@ fun SearchView(
                 }) {
                     Icon(
                         Icons.Default.Search,
+                        tint = Color.White,
                         contentDescription = "",
                         modifier = Modifier
-                            .padding(16.dp)
                             .size(24.dp)
                     )
                 }
@@ -215,9 +213,9 @@ fun SearchView(
                     ) {
                         Icon(
                             Icons.Default.Close,
+                            tint = Color.White,
                             contentDescription = "",
                             modifier = Modifier
-                                .padding(16.dp)
                                 .size(24.dp)
                         )
                     }
@@ -234,9 +232,11 @@ fun SearchView(
             colors = TextFieldDefaults.textFieldColors(
                 textColor = Color.White,
                 cursorColor = Color.White,
-                leadingIconColor = Color.White,
-                trailingIconColor = Color.White,
-                backgroundColor = Color.Transparent,
+                placeholderColor = Color.White,
+                containerColor = Color.Transparent,
+//                leadingIconColor = Color.White,
+//                trailingIconColor = Color.White,
+//                backgroundColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
